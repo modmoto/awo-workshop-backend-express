@@ -1,5 +1,5 @@
 {
-  "name": "ts-express-template",
+  "name": "guestbook-backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
