@@ -11,6 +11,7 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Headers", 'Origin,X-Requested-With,Content-Type,Accept,content-type,application/json');
   next();
 });
+
 storage.init();
 
 const greetingsKey = 'greetings';
