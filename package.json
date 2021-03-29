@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --detectOpenHandles --colors",
-    "lint": "eslint src/** tests/** --fix --cache",
-    "build": "rimraf ./build && tsc",
-    "start": "ts-node-dev --respawn --transpileOnly src/index.ts",
-    "start:prod": "npm run build && node ./build/index.js"
+    "serve": "ts-node-dev --respawn --transpileOnly src/index.ts",
+    "start": "node dist/index.js",
+    "postinstall": "tsc",
+    "watch-node": "nodemon dist/index.js",
+    "watch-ts": "tsc -w"
   },
   "author": "",
   "license": "ISC",
