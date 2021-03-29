@@ -3,4 +3,5 @@ node_modules
 .eslintcache
 build
 jest_html_reporters.html
-./dist
+/dist
+/.node-persist
