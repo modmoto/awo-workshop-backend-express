@@ -23,9 +23,24 @@ app.delete('/greetings', async (_req, res) => {
 
 app.post('/greetings', async (_req, res) => {
   const greeting = _req.body as Greeting;
+  greeting.likes = 0;
   const greetings = await storage.getItem(greetingsKey) ?? [];
   greetings.push(greeting);
   await storage.setItem(greetingsKey, greetings);
+  res.send(greetings);
+});
+
+app.put('/greetings', async (_req, res) => {
+  const greetings = (await storage.getItem(greetingsKey) ?? []) as Greeting[];
+  const greetingId = "123";
+  const greetingEdit = greetings.find(g => g.id === greetingId);
+  if (greetingEdit) {
+    greetingEdit.likes += 1
+    const newGreetings = greetings.filter(g => g.id !== greetingId)
+    newGreetings.push(greetingEdit)
+    await storage.setItem(greetingsKey, greetings);
+  }
+
   res.send(greetings);
 });
 
