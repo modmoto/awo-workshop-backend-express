@@ -36,7 +36,7 @@ app.post('/greetings', async (_req, res) => {
   greeting.likes = 0;
   greeting.id = createGuid();
   const greetings = await storage.getItem(greetingsKey) ?? [];
-  greetings.push(greeting);
+  greetings.unshift(greeting);
   await storage.setItem(greetingsKey, greetings);
   res.send(greetings);
 });
