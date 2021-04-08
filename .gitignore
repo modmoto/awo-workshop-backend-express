@@ -5,3 +5,4 @@ build
 jest_html_reporters.html
 /dist
 /.node-persist
+package-lock.json
