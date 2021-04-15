@@ -1,6 +1,6 @@
 import express from 'express';
 import { Greeting } from './types';
-import { MongoClient} from 'mongodb';
+import { MongoClient, ObjectID } from 'mongodb';
 import cors from 'cors';
 
 const app = express();
@@ -29,7 +29,7 @@ app.delete('/greetings/:userName/:greetingId', async (_req, res) => {
   const greetingId = _req.params.greetingId;
   var collection = await getUserCollection(userName)
   await collection.deleteOne({
-    _id: greetingId 
+    _id: new ObjectID(greetingId) 
   });
   const greetings = await collection.find({}).toArray() ?? [];
   res.send(greetings);
@@ -51,13 +51,13 @@ app.put('/greetings/:userName/:greetingId', async (_req, res) => {
   const greetingId = _req.params.greetingId;
   var collection = await getUserCollection(userName)
   const greeting = await collection.findOne({
-    _id: greetingId 
+    _id: new ObjectID(greetingId)
   });
 
   if (greeting) {
     greeting.likes += 1
-    await collection.updateOne({
-      _id: greetingId 
+    await collection.replaceOne({
+      _id: new ObjectID(greetingId)
     }, greeting);
   }
 
