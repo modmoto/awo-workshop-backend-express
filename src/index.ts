@@ -1,57 +1,67 @@
 import express from 'express';
-import storage from 'node-persist';
 import { Greeting } from './types';
+import { MongoClient} from 'mongodb';
 import cors from 'cors';
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-storage.init();
+const url = 'mongodb://157.90.1.251:3513/';
+const dbName = 'awo-test';
 
-const greetingsKey = 'greetings';
-
-function createGuid() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
+async function getUserCollection(userName: string) {
+  const client = await MongoClient.connect(url)
+  const db = client.db(dbName)
+  const collection = db.collection(userName)
+  return collection;
 }
 
-app.get('/greetings', async (_req, res) => {
-  const greetings = await storage.getItem(greetingsKey) ?? [];
+app.get('/greetings/:userName', async (_req, res) => {
+  const userName = _req.params.userName;
+  var collection = await getUserCollection(userName)
+  const greetings = await collection.find({}).toArray() ?? [];
   res.send(greetings);
 });
 
-app.delete('/greetings/:greetingId', async (_req, res) => {
+app.delete('/greetings/:userName/:greetingId', async (_req, res) => {
+  const userName = _req.params.userName;
   const greetingId = _req.params.greetingId;
-  const greetings = (await storage.getItem(greetingsKey) ?? []) as Greeting[];
-  const newGreetings = greetings.filter(g => g.id !== greetingId)
-  await storage.setItem(greetingsKey, newGreetings);
-  res.send(newGreetings);
+  var collection = await getUserCollection(userName)
+  await collection.deleteOne({
+    _id: greetingId 
+  });
+  const greetings = await collection.find({}).toArray() ?? [];
+  res.send(greetings);
 });
 
-app.post('/greetings', async (_req, res) => {
+app.post('/greetings/:userName', async (_req, res) => {
+  const userName = _req.params.userName;
   const greeting = _req.body as Greeting;
   greeting.likes = 0;
-  greeting.id = createGuid();
-  const greetings = await storage.getItem(greetingsKey) ?? [];
-  greetings.unshift(greeting);
-  await storage.setItem(greetingsKey, greetings);
+  
+  var collection = await getUserCollection(userName)
+  await collection.insertOne(greeting);
+  const greetings = await collection.find({}).toArray() ?? [];
   res.send(greetings);
 });
 
-app.put('/greetings/:greetingId', async (_req, res) => {
-  const greetings = (await storage.getItem(greetingsKey) ?? []) as Greeting[];
+app.put('/greetings/:userName/:greetingId', async (_req, res) => {
+  const userName = _req.params.userName;
   const greetingId = _req.params.greetingId;
-  const greetingEdit = greetings.find(g => g.id === greetingId);
-  if (greetingEdit) {
-    greetingEdit.likes += 1
-    const newGreetings = greetings.filter(g => g.id !== greetingId)
-    newGreetings.push(greetingEdit)
-    await storage.setItem(greetingsKey, greetings);
+  var collection = await getUserCollection(userName)
+  const greeting = await collection.findOne({
+    _id: greetingId 
+  });
+
+  if (greeting) {
+    greeting.likes += 1
+    await collection.updateOne({
+      _id: greetingId 
+    }, greeting);
   }
 
+  const greetings = await collection.find({}).toArray() ?? [];
   res.send(greetings);
 });
 
