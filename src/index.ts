@@ -5,7 +5,7 @@ import cors from 'cors';
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+// app.use(cors());
 
 const url = 'mongodb://157.90.1.251:3513/';
 const dbName = 'awo-test';
